@@ -1,0 +1,32 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "ec20afce-4950-44d3-bd7c-a9863a3cea81": {
+        "size": {
+          "width": 140,
+          "height": 140
+        },
+        "position": {
+          "x": 370,
+          "y": 86
+        },
+        "z": 0
+      }
+    }
+  },
+  "Resources": {
+    "DemoApplication": {
+      "Type": "AWS::ElasticBeanstalk::Application",
+      "Properties": {
+        "ApplicationName": "DemoApplication",
+        "Description": "SpringBoot Demo Application"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "ec20afce-4950-44d3-bd7c-a9863a3cea81"
+        }
+      }
+    }
+  }
+}
