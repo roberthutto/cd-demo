@@ -23,9 +23,25 @@
           {
             "Namespace": "aws:autoscaling:launchconfiguration",
             "OptionName": "InstanceType",
-            "Value": {"Ref" : "InstanceType"}
+            "Value": {
+              "Ref": "InstanceType"
+            }
           }
         ]
+      },
+      "Metadata": {
+      }
+    },
+    "Environment": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "EnvironmentName": "test-env",
+        "ApplicationName": {
+          "Ref": "DemoApplication"
+        },
+        "TemplateName": {
+          "Ref": "ConfigurationTemplate"
+        }
       },
       "Metadata": {
       }
@@ -35,7 +51,10 @@
     "InstanceType": {
       "Type": "String",
       "Default": "t2.micro",
-      "AllowedValues": [ "t2.micro", "t2.medium"],
+      "AllowedValues": [
+        "t2.micro",
+        "t2.medium"
+      ],
       "Description": "Enter the Instance Size"
     }
   }
