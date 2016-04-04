@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vcs-root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="c74dffc2-e458-4966-b5c8-12e8893b359b" type="jetbrains.git" xsi:noNamespaceSchemaLocation="http://www.jetbrains.com/teamcity/schemas/9.0/project-config.xsd">
+  <name>https://github.com/roberthutto/cd-demo.git</name>
+  <param name="agentCleanFilesPolicy" value="ALL_UNTRACKED" />
+  <param name="agentCleanPolicy" value="ON_BRANCH_CHANGE" />
+  <param name="authMethod" value="PASSWORD" />
+  <param name="branch" value="refs/heads/master" />
+  <param name="ignoreKnownHosts" value="true" />
+  <param name="secure:password" value="zxxb22f035ea98d5b483317e6b0152a0eb260b5aa1bed084e3a373618773cf9dbe100fa97364f2fd164775d03cbe80d301b" />
+  <param name="submoduleCheckout" value="CHECKOUT" />
+  <param name="url" value="https://github.com/roberthutto/cd-demo.git" />
+  <param name="useAlternates" value="true" />
+  <param name="username" value="roberthutto" />
+  <param name="usernameStyle" value="USERID" />
+</vcs-root>
+
