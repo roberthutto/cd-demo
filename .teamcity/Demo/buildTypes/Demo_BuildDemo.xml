@@ -3,6 +3,9 @@
   <name>BUILD</name>
   <description>builds the demo jar</description>
   <settings>
+    <options>
+      <option name="artifactRules" value="cfn/demo-master.template&#xA;build/libs/demo-0.0.3-SNAPSHOT.jar" />
+    </options>
     <parameters />
     <build-runners>
       <runner id="RUNNER_1" name="" type="gradle-runner">
