@@ -7,6 +7,7 @@
     <build-runners>
       <runner id="RUNNER_1" name="" type="gradle-runner">
         <parameters>
+          <param name="target.jdk.home" value="/usr/lib/jvm/java-1.8.0-openjdk.x86_64" />
           <param name="teamcity.step.mode" value="default" />
           <param name="ui.gradleRunner.gradle.tasks.names" value="clean build" />
           <param name="ui.gradleRunner.gradle.wrapper.useWrapper" value="true" />
