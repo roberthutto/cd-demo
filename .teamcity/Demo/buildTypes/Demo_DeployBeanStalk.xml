@@ -10,6 +10,12 @@
     </vcs-settings>
     <requirements />
     <build-triggers />
+    <artifact-dependencies>
+      <dependency sourceBuildTypeId="Demo_BuildDemo" cleanDestination="false">
+        <revisionRule name="lastSuccessful" revision="latest.lastSuccessful" />
+        <artifact sourcePath="demo-0.0.3-SNAPSHOT.jar&#xD;&#xA;demo-master.template" />
+      </dependency>
+    </artifact-dependencies>
     <dependencies>
       <depend-on sourceBuildTypeId="Demo_BuildDemo">
         <options>
