@@ -3,6 +3,9 @@
   <name>Deploy BeanStalk</name>
   <description />
   <settings>
+    <options>
+      <option name="buildNumberPattern" value="%dep.Demo_BuildDemo.build.counter%" />
+    </options>
     <parameters />
     <build-runners>
       <runner id="RUNNER_2" name="hello world" type="simpleRunner">
