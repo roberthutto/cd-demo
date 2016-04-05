@@ -9,7 +9,14 @@
       <vcs-entry-ref root-id="Demo_HttpsGithubComRoberthuttoCdDemoGit" />
     </vcs-settings>
     <requirements />
-    <build-triggers />
+    <build-triggers>
+      <build-trigger id="TRIGGER_2" type="buildDependencyTrigger">
+        <parameters>
+          <param name="afterSuccessfulBuildOnly" value="true" />
+          <param name="dependsOn" value="Demo_BuildDemo" />
+        </parameters>
+      </build-trigger>
+    </build-triggers>
     <artifact-dependencies>
       <dependency sourceBuildTypeId="Demo_BuildDemo" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
