@@ -1,0 +1,415 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation Sample Template VPC_Single_Instance_In_Subnet: Sample template showing how to create a VPC and add an EC2 instance with an Elastic IP address and a security group. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+  "Parameters": {
+    "InstanceType": {
+      "Description": "TeamCity EC2 instance type",
+      "Type": "String",
+      "Default": "t2.medium",
+      "AllowedValues": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "KeyName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance.",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "SSHLocation": {
+      "Description": " The IP address range that can be used access the web server using SSH.",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
+  },
+  "Mappings": {
+    "AWSInstanceType2Arch": {
+      "t2.micro": {
+        "Arch": "HVM64"
+      },
+      "t2.small": {
+        "Arch": "HVM64"
+      },
+      "t2.medium": {
+        "Arch": "HVM64"
+      }
+    },
+    "AWSRegionArch2AMI": {
+      "us-east-1": {
+        "HVM64": "ami-1ecae776"
+      },
+      "us-west-2": {
+        "HVM64": "ami-e7527ed7"
+      },
+      "us-west-1": {
+        "HVM64": "ami-d114f295"
+      }
+    }
+  },
+  "Resources": {
+    
+    "CIServerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow access from HTTP and SSH traffic",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "8111",
+            "ToPort": "8111",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "2e76192b-a4f8-48a5-92b6-abbfa8b83263"
+        }
+      }
+    },
+    "TeamCityInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "All": [
+              "DownloadBaseTeamCity" ,  "DownloadProjectTeamCity", "StartTeamCity"
+            ]
+          },
+          "DownloadBaseTeamCity": {
+            "sources": {
+              "/home/ec2-user/": "https://s3.amazonaws.com/base-teamcity/BuildServer.tar.gz"
+            },
+            "commands": {
+              "01_change_permissions": {
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/.BuildServer"
+              }
+            }
+          },
+          "DownloadProjectTeamCity": {
+            "sources": {
+              "/home/ec2-user/": "https://github.com/roberthutto/cd-demo/archive/master.zip"
+            },
+            "commands": {
+              "01_change_permissions": {
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master"
+              },
+              "02_change_permissions": {
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master"
+              },
+              "03_move_project": {
+                "command": "mv /home/ec2-user/cd-demo-master/.teamcity/Demo /home/ec2-user/.BuildServer/config/projects"
+              }
+            }
+          },
+          "StartTeamCity": {
+            "packages": {
+              "yum": {
+                "java-1.8.0-openjdk-devel": []
+              }
+            },
+            "sources": {
+                "/home/ec2-user/": "https://download.jetbrains.com/teamcity/TeamCity-9.1.6.tar.gz"
+            },
+            "commands": {
+              "01_change_permissions": {
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/TeamCity"
+              },
+              "02_start_teamcity": {
+                "command": "su - ec2-user /home/ec2-user/TeamCity/bin/runAll.sh start"
+              },
+              "03_sleep": {
+                "command": "sleep 100"
+              },
+              "04_trigger_initial_build": {
+                "command": "wget http://admin:admin@localhost:8111/httpAuth/action.html?add2Queue=Demo_DeployBeanStalk"
+              }
+            },
+            "files": {
+              "/etc/cfn/cfn-hup.conf" : {
+                "content" : { "Fn::Join" : ["", [
+                  "[main]\n",
+                  "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                "content": { "Fn::Join" : ["", [
+                  "[cfn-auto-reloader-hook]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init\n",
+                  "action=/opt/aws/bin/cfn-init -v ",
+                  "         --stack ", { "Ref" : "AWS::StackName" },
+                  "         --resource LaunchConfig ",
+                  "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                  "runas=root\n"
+                ]]}
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "cfn-hup": {
+                  "enabled": "true",
+                  "ensureRunning": "true",
+                  "files": [
+                    "/etc/cfn/cfn-hup.conf",
+                    "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "AWS::CloudFormation::Designer": {
+          "id": "0f900c9e-1272-4ec2-8a42-790b074baa39"
+        }
+      },
+      "Properties": {
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSRegionArch2AMI",
+            {
+              "Ref": "AWS::Region"
+            },
+            {
+              "Fn::FindInMap": [
+                "AWSInstanceType2Arch",
+                {
+                  "Ref": "InstanceType"
+                },
+                "Arch"
+              ]
+            }
+          ]
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroups": [
+          { "Ref": "CIServerSecurityGroup" }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "# Install the files and packages from the metadata\n",
+                "/opt/aws/bin/cfn-init -v ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource TeamCityInstance ",
+                "         --configsets All ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource TeamCityInstance ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT5M"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "URL": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "TeamCityInstance",
+                "PublicIp"
+              ]
+            },
+            ":8111"
+          ]
+        ]
+      },
+      "Description": "Newly created application URL"
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "a166c4f5-7cc4-429b-b9d8-2c8c43facc63": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -40,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "96a791f0-938b-4ebe-9f3c-b3fe2a588aee": {
+        "size": {
+          "width": 320,
+          "height": 250
+        },
+        "position": {
+          "x": 70,
+          "y": 190
+        },
+        "z": 1,
+        "embeds": [
+          "2e76192b-a4f8-48a5-92b6-abbfa8b83263",
+          "175bad80-0988-4588-a919-331be705b02d",
+          "3df467ad-673c-4c48-a41c-3ac1626961e3"
+        ]
+      },
+      "2e76192b-a4f8-48a5-92b6-abbfa8b83263": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 280,
+          "y": 370
+        },
+        "z": 2,
+        "parent": "96a791f0-938b-4ebe-9f3c-b3fe2a588aee",
+        "embeds": []
+      },
+      "175bad80-0988-4588-a919-331be705b02d": {
+        "size": {
+          "width": 120,
+          "height": 120
+        },
+        "position": {
+          "x": 90,
+          "y": 230
+        },
+        "z": 2,
+        "parent": "96a791f0-938b-4ebe-9f3c-b3fe2a588aee",
+        "embeds": [
+          "143bbaa1-66a2-42a5-885f-e6300817103c"
+        ]
+      },
+      "1790ebeb-2e41-4293-8cc1-aaba134fd1e0": {
+        "source": {
+          "id": "a166c4f5-7cc4-429b-b9d8-2c8c43facc63"
+        },
+        "target": {
+          "id": "96a791f0-938b-4ebe-9f3c-b3fe2a588aee"
+        },
+        "z": 1
+      },
+      "143bbaa1-66a2-42a5-885f-e6300817103c": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 120,
+          "y": 260
+        },
+        "z": 3,
+        "parent": "175bad80-0988-4588-a919-331be705b02d",
+        "embeds": [],
+        "references": [
+          "a166c4f5-7cc4-429b-b9d8-2c8c43facc63"
+        ],
+        "dependson": [
+          "1790ebeb-2e41-4293-8cc1-aaba134fd1e0"
+        ],
+        "isrelatedto": [
+          "a166c4f5-7cc4-429b-b9d8-2c8c43facc63"
+        ]
+      },
+      "3df467ad-673c-4c48-a41c-3ac1626961e3": {
+        "size": {
+          "width": 120,
+          "height": 120
+        },
+        "position": {
+          "x": 250,
+          "y": 230
+        },
+        "z": 0,
+        "parent": "96a791f0-938b-4ebe-9f3c-b3fe2a588aee",
+        "embeds": [
+          "0f900c9e-1272-4ec2-8a42-790b074baa39"
+        ]
+      },
+      "0f900c9e-1272-4ec2-8a42-790b074baa39": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 280,
+          "y": 260
+        },
+        "z": 3,
+        "parent": "3df467ad-673c-4c48-a41c-3ac1626961e3",
+        "embeds": [],
+        "isrelatedto": [
+          "2e76192b-a4f8-48a5-92b6-abbfa8b83263"
+        ]
+      },
+      "13e0e0da-40c9-45d0-8460-7732ed20d764": {
+        "source": {
+          "id": "96a791f0-938b-4ebe-9f3c-b3fe2a588aee"
+        },
+        "target": {
+          "id": "3df467ad-673c-4c48-a41c-3ac1626961e3"
+        },
+        "z": 2
+      },
+      "528e2b71-46e6-4e09-815a-f70630755219": {
+        "source": {
+          "id": "175bad80-0988-4588-a919-331be705b02d"
+        },
+        "target": {
+          "id": "3df467ad-673c-4c48-a41c-3ac1626961e3"
+        },
+        "z": 2
+      }
+    }
+  }
+}

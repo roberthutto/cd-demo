@@ -1,5 +1,41 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Parameters": {
+    "BaseTemplateURL":{
+      "Type":"String",
+      "Description":"S3 Base URL of all the CloudFormation templated used in Dromedary (without the file names)",
+      "Default":"https://s3.amazonaws.com/demo-cfn-public/"
+    },
+    "TeamcityCFNTemplateFile":{
+      "Type":"String",
+      "Description":"Just the name of the CloudFormation template. Used with BaseTemplateURL.",
+      "Default":"teamcity-instance.template"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "t2.medium",
+      "AllowedValues": [
+        "t2.micro",
+        "t2.medium"
+      ],
+      "Description": "Enter the Instance Size"
+    },
+    "KeyName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance.",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "SSHLocation": {
+      "Description": " The IP address range that can be used access the web server using SSH.",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
+  },
   "Metadata": {
   },
   "Resources": {
@@ -35,7 +71,7 @@
     "Environment": {
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
-        "EnvironmentName": "test-env",
+        "EnvironmentName": "demo-env",
         "ApplicationName": {
           "Ref": "DemoApplication"
         },
@@ -45,17 +81,39 @@
       },
       "Metadata": {
       }
-    }
-  },
-  "Parameters": {
-    "InstanceType": {
-      "Type": "String",
-      "Default": "t2.micro",
-      "AllowedValues": [
-        "t2.micro",
-        "t2.medium"
+    },
+    "JenkinsStack":{
+      "Type":"AWS::CloudFormation::Stack",
+      "DependsOn":[
+        "Environment"
       ],
-      "Description": "Enter the Instance Size"
+      "Properties":{
+        "TemplateURL":{
+          "Fn::Join":[
+            "",
+            [
+              {
+                "Ref":"BaseTemplateURL"
+              },
+              {
+                "Ref":"TeamcityCFNTemplateFile"
+              }
+            ]
+          ]
+        },
+        "TimeoutInMinutes":"60",
+        "Parameters":{
+          "InstanceType": {
+            "Ref": "InstanceType"
+          },
+          "KeyName": {
+            "Ref": "KeyName"
+          },
+          "SSHLocation": {
+            "Ref": "SSHLocation"
+          }
+        }
+      }
     }
   }
 }
