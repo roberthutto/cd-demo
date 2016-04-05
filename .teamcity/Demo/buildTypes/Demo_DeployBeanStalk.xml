@@ -10,7 +10,7 @@
     <build-runners>
       <runner id="RUNNER_2" name="hello world" type="simpleRunner">
         <parameters>
-          <param name="script.content" value="echo &quot;hello&quot;" />
+          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name demo-env --version-label demo-0.4-SNAPSHOT" />
           <param name="teamcity.step.mode" value="default" />
           <param name="use.custom.script" value="true" />
         </parameters>
