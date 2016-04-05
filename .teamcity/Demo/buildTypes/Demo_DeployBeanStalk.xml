@@ -8,13 +8,6 @@
     </options>
     <parameters />
     <build-runners>
-      <runner id="RUNNER_2" name="hello world" type="simpleRunner">
-        <parameters>
-          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name demo-env --version-label demo-0.4-SNAPSHOT" />
-          <param name="teamcity.step.mode" value="default" />
-          <param name="use.custom.script" value="true" />
-        </parameters>
-      </runner>
       <runner id="RUNNER_3" name="Create Application Version" type="gradle-runner">
         <parameters>
           <param name="teamcity.coverage.emma.include.source" value="true" />
@@ -25,6 +18,13 @@
           <param name="ui.gradleRUnner.gradle.build.file" value="build.gradle" />
           <param name="ui.gradleRunner.gradle.tasks.names" value="awsEbCreateApplicationVersion" />
           <param name="ui.gradleRunner.gradle.wrapper.useWrapper" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_2" name="hello world" type="simpleRunner">
+        <parameters>
+          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name demo-env --version-label demo-0.4-SNAPSHOT" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
         </parameters>
       </runner>
     </build-runners>
