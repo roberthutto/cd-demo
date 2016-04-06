@@ -8,13 +8,6 @@
     </options>
     <parameters />
     <build-runners>
-      <runner id="RUNNER_4" name="deploy to s3" type="simpleRunner">
-        <parameters>
-          <param name="script.content" value="aws s3 cp *.jar s3://demo-cfn-public/" />
-          <param name="teamcity.step.mode" value="default" />
-          <param name="use.custom.script" value="true" />
-        </parameters>
-      </runner>
       <runner id="RUNNER_5" name="create application version" type="simpleRunner">
         <parameters>
           <param name="script.content" value="aws elasticbeanstalk create-application-version --application-name DemoApplication --version-label demo-build-%build.number% --source-bundle S3Bucket=&quot;demo-cfn-public&quot;,S3Key=&quot;demo-0.0.3-SNAPSHOT.jar&quot;" />
