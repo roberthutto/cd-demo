@@ -16,6 +16,6 @@ public class Application {
 
     @RequestMapping("/")
     String index() {
-        return "Welcome to the Jungle";
+        return "Automation for the People";
     }
 }

@@ -31,7 +31,6 @@ repositories {
 }
 
 aws {
-	profileName = "default"
 	region = "us-east-1"
 }
 beanstalk {

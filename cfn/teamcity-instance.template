@@ -81,6 +81,50 @@
         }
       }
     },
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "RootInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ { "Ref": "RootRole" } ]
+      }
+    },
+    "RolePolicies": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "root",
+        "PolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+          } ]
+        },
+        "Roles": [ { "Ref": "RootRole" } ]
+      }
+    },
     "TeamCityInstance": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
@@ -184,6 +228,9 @@
       "Properties": {
         "InstanceType": {
           "Ref": "InstanceType"
+        },
+        "IamInstanceProfile": {
+          "Ref": "RootInstanceProfile"
         },
         "ImageId": {
           "Fn::FindInMap": [
