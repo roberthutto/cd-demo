@@ -2,6 +2,14 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AWS CloudFormation Sample Template VPC_Single_Instance_In_Subnet: Sample template showing how to create a VPC and add an EC2 instance with an Elastic IP address and a security group. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
   "Parameters": {
+    "AccessKeyId": {
+      "Type": "String",
+      "Description": "Users Access ID"
+    },
+    "AccessKey": {
+      "Type": "String",
+      "Description": "Users Access Key"
+    },
     "InstanceType": {
       "Description": "TeamCity EC2 instance type",
       "Type": "String",
@@ -131,8 +139,53 @@
         "AWS::CloudFormation::Init": {
           "configSets": {
             "All": [
-              "DownloadBaseTeamCity" ,  "DownloadProjectTeamCity", "StartTeamCity"
+              "SetCredentials", "DownloadBaseTeamCity" ,  "DownloadProjectTeamCity", "StartTeamCity"
             ]
+          },
+          "SetCredentials": {
+            "files": {
+              "/home/ec2-user/.aws/config": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "[default]\n",
+                      "region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n"
+                    ]
+                  ]
+                },
+                "mode": "000400",
+                "owner": "root",
+                "group": "root"
+              },
+              "/home/ec2-user/.aws/credentials": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "[default]\n",
+                      "aws_access_key_id=",
+                      {
+                        "Ref": "AccessKeyId"
+                      },
+                      "\n",
+                      "aws_secret_access_key=",
+                      {
+                        "Ref": "AccessKey"
+                      },
+                      "\n"
+                    ]
+                  ]
+                },
+                "mode": "000400",
+                "owner": "root",
+                "group": "root"
+              }
+            }
           },
           "DownloadBaseTeamCity": {
             "sources": {

@@ -2,6 +2,15 @@
   "AWSTemplateFormatVersion": "2010-09-09",
 
   "Parameters": {
+
+    "AccessKeyId": {
+      "Type": "String",
+      "Description": "Users Access ID"
+    },
+    "AccessKey": {
+      "Type": "String",
+      "Description": "Users Access Key"
+    },
     "BaseTemplateURL":{
       "Type":"String",
       "Description":"S3 Base URL of all the CloudFormation templated used in Dromedary (without the file names)",
@@ -110,6 +119,12 @@
             "Ref": "KeyName"
           },
           "SSHLocation": {
+            "Ref": "SSHLocation"
+          },
+          "AccessKeyId": {
+            "Ref": "AccessKeyId"
+          },
+          "AccessKey": {
             "Ref": "SSHLocation"
           }
         }
