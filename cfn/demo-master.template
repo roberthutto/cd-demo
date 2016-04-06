@@ -125,7 +125,7 @@
             "Ref": "AccessKeyId"
           },
           "AccessKey": {
-            "Ref": "SSHLocation"
+            "Ref": "AccessKey"
           }
         }
       }
