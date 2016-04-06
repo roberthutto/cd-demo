@@ -15,6 +15,13 @@
           <param name="use.custom.script" value="true" />
         </parameters>
       </runner>
+      <runner id="RUNNER_4" name="deploy to s3" type="simpleRunner">
+        <parameters>
+          <param name="script.content" value="aws s3 cp *.jar s3://demo-cfn-public/" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
     </build-runners>
     <vcs-settings>
       <vcs-entry-ref root-id="Demo_HttpsGithubComRoberthuttoCdDemoGit" />
