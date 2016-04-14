@@ -8,7 +8,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath "jp.classmethod.aws:gradle-aws-plugin:0.24"
+		//classpath "jp.classmethod.aws:gradle-aws-plugin:0.24"
 
 	}
 }
@@ -16,8 +16,8 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
-apply plugin: 'jp.classmethod.aws.beanstalk'
-apply plugin: 'jp.classmethod.aws'
+//apply plugin: 'jp.classmethod.aws.beanstalk'
+//apply plugin: 'jp.classmethod.aws'
 
 jar {
 	baseName = 'demo'
@@ -31,27 +31,27 @@ repositories {
 	mavenCentral()
 }
 
-aws {
-	region = "us-east-1"
-}
-beanstalk {
-
-	appName 'DemoApplication'
-	appDesc 'foobar demo application'
-
-	version {
-		label = "demo-build-"+ project.teamcity["build.number"]
-		description = "v${project.version}"
-		bucket = "elasticbeanstalk-${aws.region}-${aws.accountId}"
-		key = "eb-apps/demo-${artifactId}.jar"
-	}
-
-	environment {
-		tier = 'WebServer'
-		envName = 'demo-env'
-		envDesc = 'foobar demo application development environemnt'
-	}
-}
+//aws {
+//	region = "us-east-1"
+//}
+//beanstalk {
+//
+//	appName 'DemoApplication'
+//	appDesc 'foobar demo application'
+//
+//	version {
+//		label = "demo-build-"+ project.teamcity["build.number"]
+//		description = "v${project.version}"
+//		bucket = "elasticbeanstalk-${aws.region}-${aws.accountId}"
+//		key = "eb-apps/demo-${artifactId}.jar"
+//	}
+//
+//	environment {
+//		tier = 'WebServer'
+//		envName = 'demo-env'
+//		envDesc = 'foobar demo application development environemnt'
+//	}
+//}
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
