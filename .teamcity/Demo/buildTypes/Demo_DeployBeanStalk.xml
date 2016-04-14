@@ -6,9 +6,7 @@
     <options>
       <option name="buildNumberPattern" value="%dep.Demo_BuildDemo.build.counter%" />
     </options>
-    <parameters>
-      <param name="env.STACKNAME" value="demo12" />
-    </parameters>
+    <parameters />
     <build-runners>
       <runner id="RUNNER_5" name="create application version" type="simpleRunner">
         <parameters>
