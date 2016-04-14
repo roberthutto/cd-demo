@@ -22,6 +22,13 @@
           <param name="use.custom.script" value="true" />
         </parameters>
       </runner>
+      <runner id="RUNNER_3" name="application version" type="simpleRunner">
+        <parameters>
+          <param name="script.content" value="aws elasticbeanstalk create-application-version --application-name demo11 --version-label demo-build-%build.number% --source-bundle S3Bucket=&quot;demo-cfn-public&quot;,S3Key=&quot;demo-0.0.3-SNAPSHOT.jar&quot;" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
     </build-runners>
     <vcs-settings>
       <vcs-entry-ref root-id="Demo_HttpsGithubComRoberthuttoCdDemoGit" />
