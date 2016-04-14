@@ -8,16 +8,11 @@
     </options>
     <parameters />
     <build-runners>
-      <runner id="RUNNER_5" name="create application version" type="gradle-runner">
+      <runner id="RUNNER_5" name="create application version" type="simpleRunner">
         <parameters>
-          <param name="teamcity.coverage.emma.include.source" value="true" />
-          <param name="teamcity.coverage.emma.instr.parameters" value="-ix -*Test*" />
-          <param name="teamcity.coverage.idea.includePatterns" value="*" />
-          <param name="teamcity.coverage.jacoco.patterns" value="+:*" />
+          <param name="script.content" value="aws s3 cp *.jar s3://demo-cfn-public/" />
           <param name="teamcity.step.mode" value="default" />
-          <param name="ui.gradleRUnner.gradle.build.file" value="build.gradle" />
-          <param name="ui.gradleRunner.gradle.tasks.names" value="awsEbCreateApplicationVersion" />
-          <param name="ui.gradleRunner.gradle.wrapper.useWrapper" value="true" />
+          <param name="use.custom.script" value="true" />
         </parameters>
       </runner>
       <runner id="RUNNER_2" name="Update Environment to Application Version" type="simpleRunner">
