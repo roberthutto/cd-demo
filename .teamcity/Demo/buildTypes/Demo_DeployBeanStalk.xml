@@ -10,7 +10,7 @@
     <build-runners>
       <runner id="RUNNER_5" name="create application version" type="simpleRunner">
         <parameters>
-          <param name="script.content" value="aws s3 cp *.jar s3://%env.BEANSTALK_BUCKET%/" />
+          <param name="script.content" value="aws s3 cp *.jar s3://demo-cfn-public/" />
           <param name="teamcity.step.mode" value="default" />
           <param name="use.custom.script" value="true" />
         </parameters>
@@ -24,7 +24,7 @@
       </runner>
       <runner id="RUNNER_2" name="Update Environment to Application Version" type="simpleRunner">
         <parameters>
-          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name %env.STACKNAME% --version-label demo-build-%build.number%" />
+          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name %STACKNAME% --version-label demo-build-%build.number%" />
           <param name="teamcity.step.mode" value="default" />
           <param name="use.custom.script" value="true" />
         </parameters>
