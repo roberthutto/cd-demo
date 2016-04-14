@@ -169,7 +169,8 @@
             },
             "commands": {
               "01_change_permissions": {
-                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master"
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master",
+                "env" : {"STACKNAME" : { "Ref" : "AWS::StackName" }}
               },
               "02_change_permissions": {
                 "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master"
