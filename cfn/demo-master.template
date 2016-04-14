@@ -1,25 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-
   "Parameters": {
-
-    "AccessKeyId": {
+    "BaseTemplateURL": {
       "Type": "String",
-      "Description": "Users Access ID"
+      "Description": "S3 Base URL of all the CloudFormation templated used in Dromedary (without the file names)",
+      "Default": "https://s3.amazonaws.com/demo-cfn-public/"
     },
-    "AccessKey": {
+    "TeamcityCFNTemplateFile": {
       "Type": "String",
-      "Description": "Users Access Key"
-    },
-    "BaseTemplateURL":{
-      "Type":"String",
-      "Description":"S3 Base URL of all the CloudFormation templated used in Dromedary (without the file names)",
-      "Default":"https://s3.amazonaws.com/demo-cfn-public/"
-    },
-    "TeamcityCFNTemplateFile":{
-      "Type":"String",
-      "Description":"Just the name of the CloudFormation template. Used with BaseTemplateURL.",
-      "Default":"teamcity-instance.template"
+      "Description": "Just the name of the CloudFormation template. Used with BaseTemplateURL.",
+      "Default": "teamcity-instance.template"
     },
     "InstanceType": {
       "Type": "String",
@@ -45,13 +35,168 @@
       "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
     }
   },
+  "Mappings": {
+    "SubnetConfig": {
+      "VPC": {
+        "CIDR": "10.0.0.0/16"
+      },
+      "Public": {
+        "CIDR": "10.0.0.0/24"
+      },
+      "Private": {
+        "CIDR": "10.0.1.0/24"
+      }
+    }
+  },
   "Metadata": {
   },
   "Resources": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "SubnetConfig",
+            "VPC",
+            "CIDR"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
+          }
+        ]
+      }
+    },
+    "PublicSubnet": {
+      "DependsOn": [
+        "VPC"
+      ],
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "SubnetConfig",
+            "Public",
+            "CIDR"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
+          }
+        ]
+      }
+    },
+    "InternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
+          }
+        ]
+      }
+    },
+    "VPCGatewayAttachment": {
+      "DependsOn": [
+        "VPC",
+        "InternetGateway"
+      ],
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "PublicRouteTable": {
+      "DependsOn": [
+        "VPC"
+      ],
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
+          }
+        ]
+      }
+    },
+    "PublicRoute": {
+      "DependsOn": [
+        "PublicRouteTable",
+        "InternetGateway"
+      ],
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "PublicSubnetRouteTableAssociation": {
+      "DependsOn": [
+        "PublicSubnet",
+        "PublicRouteTable"
+      ],
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicSubnet"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
     "DemoApplication": {
       "Type": "AWS::ElasticBeanstalk::Application",
       "Properties": {
-        "ApplicationName": "DemoApplication",
+        "ApplicationName": {
+          "Ref": "AWS::StackName"
+        },
         "Description": "SpringBoot Demo Application"
       },
       "Metadata": {
@@ -71,6 +216,32 @@
             "Value": {
               "Ref": "InstanceType"
             }
+          },
+          {
+            "Namespace": "aws:ec2:vpc",
+            "OptionName": "VPCId",
+            "Value": {
+              "Ref": "VPC"
+            }
+          },
+          {
+            "Namespace": "aws:ec2:vpc",
+            "OptionName": "Subnets",
+            "Value": {
+              "Ref": "PublicSubnet"
+            }
+          },
+          {
+            "Namespace": "aws:ec2:vpc",
+            "OptionName": "AssociatePublicIpAddress",
+            "Value": "true"
+          },
+          {
+            "Namespace": "aws:ec2:vpc",
+            "OptionName": "ELBSubnets",
+            "Value": {
+              "Ref": "PublicSubnet"
+            }
           }
         ]
       },
@@ -80,7 +251,9 @@
     "Environment": {
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
-        "EnvironmentName": "demo-env",
+        "EnvironmentName": {
+          "Ref": "AWS::StackName"
+        },
         "ApplicationName": {
           "Ref": "DemoApplication"
         },
@@ -91,27 +264,27 @@
       "Metadata": {
       }
     },
-    "JenkinsStack":{
-      "Type":"AWS::CloudFormation::Stack",
-      "DependsOn":[
+    "TeamCityStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
         "Environment"
       ],
-      "Properties":{
-        "TemplateURL":{
-          "Fn::Join":[
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Join": [
             "",
             [
               {
-                "Ref":"BaseTemplateURL"
+                "Ref": "BaseTemplateURL"
               },
               {
-                "Ref":"TeamcityCFNTemplateFile"
+                "Ref": "TeamcityCFNTemplateFile"
               }
             ]
           ]
         },
-        "TimeoutInMinutes":"60",
-        "Parameters":{
+        "TimeoutInMinutes": "60",
+        "Parameters": {
           "InstanceType": {
             "Ref": "InstanceType"
           },
@@ -120,12 +293,6 @@
           },
           "SSHLocation": {
             "Ref": "SSHLocation"
-          },
-          "AccessKeyId": {
-            "Ref": "AccessKeyId"
-          },
-          "AccessKey": {
-            "Ref": "AccessKey"
           }
         }
       }

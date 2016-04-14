@@ -16,9 +16,8 @@ Command to run:
     --template-body https://s3.amazonaws.com/demo-cfn-public/demo-master.template \
     --region us-east-1 \
     --disable-rollback \
+    --capabilities="CAPABILITY_IAM"
     --parameters ParameterKey=KeyName,ParameterValue=<ssh key> \
-        ParameterKey=AccessKeyId,ParameterValue=<AccessKeyId>  \
-        ParameterKey=AccessKey,ParameterValue=<AccessKey> \
 
 Outputs
 

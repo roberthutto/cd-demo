@@ -2,14 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Cloud Formation to set up TeamCity Instance",
   "Parameters": {
-    "AccessKeyId": {
-      "Type": "String",
-      "Description": "Users Access ID"
-    },
-    "AccessKey": {
-      "Type": "String",
-      "Description": "Users Access Key"
-    },
     "InstanceType": {
       "Description": "TeamCity EC2 instance type",
       "Type": "String",
@@ -86,6 +78,50 @@
       "Metadata": {
       }
     },
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "RootInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ { "Ref": "RootRole" } ]
+      }
+    },
+    "RolePolicies": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "root",
+        "PolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+          } ]
+        },
+        "Roles": [ { "Ref": "RootRole" } ]
+      }
+    },
     "TeamCityInstance": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
@@ -106,29 +142,6 @@
                       "region=",
                       {
                         "Ref": "AWS::Region"
-                      },
-                      "\n"
-                    ]
-                  ]
-                },
-                "mode": "000600",
-                "owner": "ec2-user",
-                "group": "ec2-user"
-              },
-              "/home/ec2-user/.aws/credentials": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "[default]\n",
-                      "aws_access_key_id=",
-                      {
-                        "Ref": "AccessKeyId"
-                      },
-                      "\n",
-                      "aws_secret_access_key=",
-                      {
-                        "Ref": "AccessKey"
                       },
                       "\n"
                     ]
@@ -231,6 +244,9 @@
       "Properties": {
         "InstanceType": {
           "Ref": "InstanceType"
+        },
+        "IamInstanceProfile": {
+          "Ref": "RootInstanceProfile"
         },
         "ImageId": {
           "Fn::FindInMap": [
