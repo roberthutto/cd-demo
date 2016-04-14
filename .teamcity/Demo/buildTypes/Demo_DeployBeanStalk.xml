@@ -24,7 +24,7 @@
       </runner>
       <runner id="RUNNER_2" name="Update Environment to Application Version" type="simpleRunner">
         <parameters>
-          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name %env.STACKNAME% --version-label demo-build-%build.number%" />
+          <param name="script.content" value="aws elasticbeanstalk update-environment --environment-name %STACKNAME% --version-label demo-build-%build.number%" />
           <param name="teamcity.step.mode" value="default" />
           <param name="use.custom.script" value="true" />
         </parameters>
