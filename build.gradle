@@ -71,4 +71,4 @@ task wrapper(type: Wrapper) {
 //	key "eb-apps/demo-${artifactId}.jar"
 //	file jar.archivePath
 //}
-awsEbCreateApplicationVersion.dependsOn uploadJar
+//awsEbCreateApplicationVersion.dependsOn uploadJar
