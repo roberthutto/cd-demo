@@ -10,7 +10,7 @@
     <build-runners>
       <runner id="RUNNER_5" name="create application version" type="simpleRunner">
         <parameters>
-          <param name="script.content" value="aws s3 cp *.jar s3://demo-cfn-public/" />
+          <param name="script.content" value="aws s3 cp *.jar s3://%BEANSTALK_BUCKET%/" />
           <param name="teamcity.step.mode" value="default" />
           <param name="use.custom.script" value="true" />
         </parameters>

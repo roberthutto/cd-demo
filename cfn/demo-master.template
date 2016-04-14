@@ -6,6 +6,11 @@
       "Description": "S3 Base URL of all the CloudFormation templated used in Dromedary (without the file names)",
       "Default": "https://s3.amazonaws.com/demo-cfn-public/"
     },
+    "ElasticBeanStalkBucket": {
+      "Type": "String",
+      "Description": "S3 Bucket to store Beanstalk Application Versions",
+      "Default": "demo-cfn-public"
+    },
     "TeamcityCFNTemplateFile": {
       "Type": "String",
       "Description": "Just the name of the CloudFormation template. Used with BaseTemplateURL.",
@@ -285,6 +290,9 @@
         },
         "TimeoutInMinutes": "60",
         "Parameters": {
+          "ElasticBeanStalkBucket": {
+            "Ref": "ElasticBeanStalkBucket"
+          },
           "InstanceType": {
             "Ref": "InstanceType"
           },

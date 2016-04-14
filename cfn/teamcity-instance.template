@@ -13,6 +13,11 @@
       ],
       "ConstraintDescription": "must be a valid EC2 instance type."
     },
+    "ElasticBeanStalkBucket": {
+      "Type": "String",
+      "Description": "S3 Bucket to store Beanstalk Application Versions",
+      "Default": "demo-cfn-public"
+    },
     "KeyName": {
       "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance.",
       "Type": "AWS::EC2::KeyPair::KeyName",
@@ -173,7 +178,8 @@
                 "env" : {"STACKNAME" : { "Ref" : "AWS::StackName" }}
               },
               "02_change_permissions": {
-                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master"
+                "command": "chown -R ec2-user:ec2-user /home/ec2-user/cd-demo-master",
+                "env" : {"BEANSTALK_BUCKET" : { "Ref" : "ElasticBeanStalkBucket" }}
               },
               "03_move_project": {
                 "command": "mv /home/ec2-user/cd-demo-master/.teamcity/Demo /home/ec2-user/.BuildServer/config/projects"
